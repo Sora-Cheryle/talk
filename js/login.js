@@ -1,35 +1,41 @@
-const loginIdValidator = new FieldValidator('txtLoginId', function (val) {
-  if (!val) {
-    return '请填写账号';
-  }
-});
+const loginValidator = new FiledValidator('txtLoginId', async function (val) {
+    if (!val) {
+        return '请填写账号';
+    }
+    return '';
+})
 
-const loginPwdValidator = new FieldValidator('txtLoginPwd', function (val) {
-  if (!val) {
-    return '请填写密码';
-  }
-});
+const loginPwValidator = new FiledValidator('txtLoginPwd', function (val) {
+    if (!val) {
+        return '请填写密码';
+    }
+    return '';
+})
+
+
+async function allValidatorConfirm() {
+    const result = await FiledValidator.validate(loginValidator, loginPwValidator);
+    return result;
+}
 
 const form = $('.user-form');
-
 form.onsubmit = async function (e) {
-  e.preventDefault();
-  const result = await FieldValidator.validate(
-    loginIdValidator,
-    loginPwdValidator
-  );
-  if (!result) {
-    return; // 验证未通过
-  }
-  const formData = new FormData(form); // 传入表单dom，得到一个表单数据对象
-  const data = Object.fromEntries(formData.entries());
-
-  const resp = await API.login(data);
-  if (resp.code === 0) {
-    alert('登录成功，点击确定，跳转到首页');
-    location.href = './index.html';
-  } else {
-    loginIdValidator.p.innerText = '账号或密码错误';
-    loginPwdValidator.input.value = '';
-  }
-};
+    e.preventDefault();
+    const result = await allValidatorConfirm();
+    if (!result) {
+        // 验证未通过
+        return;
+    }
+    const formDatas = new FormData(form);
+    const data = Object.fromEntries(formDatas);
+    const resp = await api.login(data);
+    console.log(resp.code);
+    if (resp.code === 0) {
+        alert('登录成功');
+        location.href = './index.html';
+    }
+    else {
+        alert('登录失败，请检查账号密码是否正确');
+        loginPwValidator.input.value = '';
+    }
+}
